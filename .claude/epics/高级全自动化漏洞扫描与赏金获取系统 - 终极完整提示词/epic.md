@@ -4,7 +4,7 @@ status: backlog
 created: 2025-09-13T10:18:39Z
 progress: 0%
 prd: .claude/prds/高级全自动化漏洞扫描与赏金获取系统 - 终极完整提示词.md
-github: [Will be updated when synced to GitHub]
+github: https://github.com/1656140175/vuln-scanner/issues/1
 ---
 
 # Epic: 高级全自动化漏洞扫描与赏金获取系统
@@ -170,16 +170,16 @@ vuln_scanner/
 - **性能优化**: 并发控制和资源管理可能需要额外调优时间
 
 ## Tasks Created
-- [ ] 001.md - 基础框架搭建 (parallel: true)
-- [ ] 002.md - 工具生命周期管理 (parallel: false, depends on: 001)
-- [ ] 003.md - 扫描引擎核心 (parallel: false, depends on: 001, 002)
-- [ ] 004.md - 五阶段扫描实现 (parallel: false, depends on: 003)
-- [ ] 005.md - 进度管理系统 (parallel: true, depends on: 003)
-- [ ] 006.md - 报告生成系统 (parallel: false, depends on: 004, 005)
-- [ ] 007.md - 平台集成功能 (parallel: false, depends on: 006)
-- [ ] 008.md - 跨平台兼容 (parallel: true, depends on: 001)
+- [ ] #7 - 基础框架搭建 (parallel: true)
+- [ ] #8 - 工具生命周期管理 (parallel: false)
+- [ ] #9 - 扫描引擎核心 (parallel: false)
+- [ ] #2 - 五阶段扫描实现 (parallel: false)
+- [ ] #4 - 进度管理系统 (parallel: true)
+- [ ] #6 - 报告生成系统 (parallel: false)
+- [ ] #3 - 平台集成功能 (parallel: false)
+- [ ] #5 - 跨平台兼容 (parallel: true)
 
 Total tasks: 8
-Parallel tasks: 3 (001, 005, 008)
-Sequential tasks: 5 (002, 003, 004, 006, 007)
+Parallel tasks: 3
+Sequential tasks: 5
 Estimated total effort: 19 days (268 hours)
