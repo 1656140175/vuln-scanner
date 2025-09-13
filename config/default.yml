@@ -67,6 +67,13 @@ database:
   timeout: 30
 
 tools:
+  # Tool management settings
+  db_path: "data/tools.db"
+  registry_file: "data/tool_registry.json"
+  usage_retention_days: 30
+  auto_install: false  # Whether to auto-install tools on first use
+  
+  # Tool configurations
   nmap:
     path: "nmap"  # Will search in PATH if not absolute
     default_args:
@@ -82,6 +89,33 @@ tools:
       - "-c"
       - "50"   # Concurrent requests
     timeout: 600
+    rate_limit: 150
+    concurrency: 25
+  
+  # Additional tools can be configured here
+  subfinder:
+    path: "subfinder"
+    timeout: 300
+    default_args:
+      - "-silent"
+  
+  httpx:
+    path: "httpx" 
+    timeout: 300
+    default_args:
+      - "-silent"
+  
+  gobuster:
+    path: "gobuster"
+    timeout: 600
+    default_args:
+      - "-q"
+  
+  sqlmap:
+    path: "sqlmap"
+    timeout: 1800
+    default_args:
+      - "--batch"
   
   # Directory for custom scripts
   custom_scripts_dir: "scripts/"

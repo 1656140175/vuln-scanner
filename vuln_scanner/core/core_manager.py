@@ -12,6 +12,7 @@ from .config import ConfigManager, ConfigValidator
 from .logger import LoggerManager, SecurityAuditLogger
 from .security import SecurityController
 from .component_manager import ComponentManager
+from .tool_manager import ToolManagerComponent
 from .exceptions import (
     VulnMinerException, ConfigurationError, ConfigValidationError,
     SystemError, DependencyError
@@ -43,6 +44,7 @@ class VulnMinerCore:
         self.security_controller: Optional[SecurityController] = None
         self.component_manager: Optional[ComponentManager] = None
         self.audit_logger: Optional[SecurityAuditLogger] = None
+        self.tool_manager_component: Optional[ToolManagerComponent] = None
         
         # Component references
         self._logger = None
@@ -69,10 +71,13 @@ class VulnMinerCore:
             # 4. Set up security framework
             self._initialize_security()
             
-            # 5. Register signal handlers
+            # 5. Initialize tool management
+            self._initialize_tool_manager()
+            
+            # 6. Register signal handlers
             self._register_signal_handlers()
             
-            # 6. Validate environment
+            # 7. Validate environment
             self._validate_environment()
             
             self.initialized = True
@@ -143,6 +148,23 @@ class VulnMinerCore:
             
         except Exception as e:
             raise SystemError(f"Security framework initialization failed: {e}")
+    
+    def _initialize_tool_manager(self) -> None:
+        """Initialize tool management system."""
+        try:
+            config = self.config_manager.to_dict()
+            self.tool_manager_component = ToolManagerComponent(config, self.logger_manager)
+            self.tool_manager_component.initialize()
+            
+            # Register tool manager component
+            self.component_manager.register_component(
+                'tool_manager',
+                self.tool_manager_component,
+                ['config', 'logger', 'security']
+            )
+            
+        except Exception as e:
+            raise SystemError(f"Tool manager initialization failed: {e}")
     
     def _register_signal_handlers(self) -> None:
         """Register signal handlers for graceful shutdown."""
@@ -272,6 +294,20 @@ class VulnMinerCore:
         
         return True
     
+    def get_tool_manager(self):
+        """Get the tool manager instance.
+        
+        Returns:
+            ToolManager instance
+            
+        Raises:
+            SystemError: If tool manager not initialized
+        """
+        if not self.tool_manager_component:
+            raise SystemError("Tool manager not initialized")
+        
+        return self.tool_manager_component.get_tool_manager()
+    
     def get_system_status(self) -> Dict[str, Any]:
         """Get system status information.
         
@@ -292,6 +328,9 @@ class VulnMinerCore:
         if self.security_controller:
             status['security'] = self.security_controller.get_security_status()
         
+        if self.tool_manager_component:
+            status['tool_manager'] = self.tool_manager_component.get_status()
+        
         return status
     
     def health_check(self) -> Dict[str, Any]:
@@ -307,7 +346,7 @@ class VulnMinerCore:
         }
         
         # Check core components
-        core_components = ['config_manager', 'logger_manager', 'security_controller']
+        core_components = ['config_manager', 'logger_manager', 'security_controller', 'tool_manager_component']
         for component_name in core_components:
             component = getattr(self, component_name, None)
             if component is None:
@@ -342,6 +381,21 @@ class VulnMinerCore:
                 'status': 'failed',
                 'message': f'Configuration check failed: {e}'
             }
+        
+        # Check tool manager health
+        if self.tool_manager_component:
+            try:
+                import asyncio
+                tool_health = asyncio.run(self.tool_manager_component.health_check())
+                health_status['checks']['tool_manager'] = tool_health['checks']
+                if not tool_health['healthy']:
+                    health_status['healthy'] = False
+            except Exception as e:
+                health_status['healthy'] = False
+                health_status['checks']['tool_manager'] = {
+                    'status': 'failed',
+                    'message': f'Tool manager health check failed: {e}'
+                }
         
         # Check disk space
         try:
