@@ -130,6 +130,10 @@ class ConfigValidator:
         if not domain:
             return False
         
+        # Allow localhost as special case
+        if domain.lower() == 'localhost':
+            return True
+        
         # Allow wildcard domains
         if domain.startswith('*.'):
             domain = domain[2:]
@@ -189,7 +193,8 @@ class ConfigValidator:
         if not size:
             return False
         
-        valid_units = ['B', 'KB', 'MB', 'GB']
+        # Check longer units first to avoid partial matches
+        valid_units = ['GB', 'MB', 'KB', 'B']
         for unit in valid_units:
             if size.upper().endswith(unit):
                 number_part = size[:-len(unit)]

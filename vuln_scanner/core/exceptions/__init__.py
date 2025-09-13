@@ -12,7 +12,7 @@ from .scan_exceptions import (
 )
 from .system_exceptions import (
     SystemError, ResourceNotFoundError, ResourceExhaustionError,
-    DatabaseError
+    DatabaseError, DependencyError
 )
 
 __all__ = [
@@ -23,5 +23,5 @@ __all__ = [
     'ScanError', 'ScanTimeoutError', 'ToolNotFoundError', 'ToolExecutionError',
     'InvalidTargetError',
     'SystemError', 'ResourceNotFoundError', 'ResourceExhaustionError',
-    'DatabaseError'
+    'DatabaseError', 'DependencyError'
 ]

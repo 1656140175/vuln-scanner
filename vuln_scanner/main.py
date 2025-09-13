@@ -117,8 +117,8 @@ def validate_configuration(config_path: Optional[str] = None) -> bool:
         True if configuration is valid, False otherwise
     """
     try:
-        # Initialize core just for configuration validation
-        with VulnMinerCore(config_path) as core:
+        # Initialize core just for configuration validation (skip tool validation)
+        with VulnMinerCore(config_path, skip_tool_validation=True) as core:
             validation_errors = core.config_manager.validate()
             
             if validation_errors:
@@ -145,7 +145,7 @@ def run_health_check(config_path: Optional[str] = None) -> bool:
         True if system is healthy, False otherwise
     """
     try:
-        with VulnMinerCore(config_path) as core:
+        with VulnMinerCore(config_path, skip_tool_validation=True) as core:
             health_status = core.health_check()
             
             print(f"System Health Check (VulnMiner {__version__})")

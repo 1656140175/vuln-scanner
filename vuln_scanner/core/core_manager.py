@@ -25,13 +25,15 @@ class VulnMinerCore:
     configuration, logging, security, and coordinates all other components.
     """
     
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: Optional[str] = None, skip_tool_validation: bool = False):
         """Initialize VulnMiner core system.
         
         Args:
             config_path: Optional path to custom configuration file
+            skip_tool_validation: Skip validation of external tools (for config validation)
         """
         self.config_path = config_path
+        self.skip_tool_validation = skip_tool_validation
         self.initialized = False
         self.shutdown_requested = False
         
@@ -183,13 +185,14 @@ class VulnMinerCore:
             elif not os.access(dir_path, os.W_OK):
                 validation_errors.append(f"Directory {dir_path} is not writable")
         
-        # Check required tools (if configured)
-        tools_config = self.config_manager.get_section('tools')
-        for tool_name, tool_config in tools_config.items():
-            if isinstance(tool_config, dict):
-                tool_path = tool_config.get('path')
-                if tool_path and not Path(tool_path).exists():
-                    validation_errors.append(f"Required tool '{tool_name}' not found at {tool_path}")
+        # Check required tools (if not skipping tool validation)
+        if not self.skip_tool_validation:
+            tools_config = self.config_manager.get_section('tools')
+            for tool_name, tool_config in tools_config.items():
+                if isinstance(tool_config, dict):
+                    tool_path = tool_config.get('path')
+                    if tool_path and not Path(tool_path).exists():
+                        validation_errors.append(f"Required tool '{tool_name}' not found at {tool_path}")
         
         if validation_errors:
             error_msg = "Environment validation failed:\n" + "\n".join(f"- {error}" for error in validation_errors)
