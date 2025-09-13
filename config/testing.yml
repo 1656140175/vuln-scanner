@@ -1,0 +1,67 @@
+# VulnMiner Testing Environment Configuration
+# This file contains testing-specific settings that override default.yml
+
+system:
+  environment: "testing"
+  debug: false
+  max_concurrent_scans: 3
+  timeout: 120  # Shorter timeout for tests
+
+security:
+  authorization:
+    enabled: true
+    whitelist_only: true
+    # Test targets - safe for testing
+    allowed_targets:
+      - "127.0.0.1"
+      - "localhost"
+      - "testphp.vulnweb.com"  # Public test site
+      - "demo.testfire.net"    # Public test site
+  
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 30
+    burst_limit: 10
+
+logging:
+  level: "WARNING"  # Reduce log noise during testing
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  file_rotation: false  # Simpler logging for tests
+  backup_count: 1
+
+database:
+  path: "data/test_vulns.db"
+  pool_size: 5
+
+# Testing tool configuration
+tools:
+  nmap:
+    path: "nmap"
+    default_args:
+      - "-sS"
+      - "-F"   # Fast scan (top 100 ports)
+    timeout: 60
+  
+  nuclei:
+    path: "nuclei"
+    default_args:
+      - "-c"
+      - "5"    # Low concurrency for testing
+      - "-t"
+      - "dns"  # Only DNS templates for faster testing
+    timeout: 120
+
+scanning:
+  default_profile: "quick"
+  
+  results:
+    retention_days: 1  # Short retention for testing
+    auto_cleanup: true
+
+reporting:
+  include_raw_output: true  # Helpful for test debugging
+
+performance:
+  max_memory_mb: 256
+  max_disk_usage_mb: 512
+  cleanup_interval: 300  # 5 minutes

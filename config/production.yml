@@ -1,0 +1,96 @@
+# VulnMiner Production Environment Configuration
+# This file contains production-specific settings that override default.yml
+
+system:
+  environment: "production"
+  debug: false
+  max_concurrent_scans: 20
+  timeout: 600  # Longer timeout for production
+
+security:
+  authorization:
+    enabled: true
+    whitelist_only: true
+    # Production should have explicit authorized targets
+    # Add your production authorized targets here
+    allowed_targets: []
+  
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 30  # Conservative rate limiting
+    burst_limit: 5
+  
+  ssl_verification: true
+  
+  target_safety:
+    allow_localhost: false  # Disable localhost in production
+    allow_private_networks: false  # Require explicit authorization
+  
+  scan_restrictions:
+    # Be more restrictive in production
+    forbidden_scan_types:
+      - "dos"  # Deny of service scans
+      - "exploit"  # Active exploitation
+
+logging:
+  level: "INFO"
+  # Structured JSON logging for production
+  format: "json"
+  file_rotation: true
+  max_file_size: "50MB"
+  backup_count: 30  # Keep more logs in production
+
+database:
+  type: "sqlite"  # Consider PostgreSQL for high-volume production
+  path: "data/prod_vulns.db"
+  pool_size: 20
+  timeout: 60
+
+# Production tool configuration
+tools:
+  nmap:
+    path: "/usr/bin/nmap"  # Use absolute paths in production
+    default_args:
+      - "-sS"
+      - "-O"
+      - "-sV"
+      - "--version-intensity"
+      - "5"
+    timeout: 600
+  
+  nuclei:
+    path: "/usr/bin/nuclei"
+    templates_dir: "/opt/nuclei-templates"
+    default_args:
+      - "-c"
+      - "100"  # Higher concurrency for production
+      - "-rl"
+      - "150"  # Rate limit requests
+    timeout: 1800
+
+scanning:
+  default_profile: "standard"
+  
+  # Longer retention for production
+  results:
+    retention_days: 90
+    auto_cleanup: true
+
+reporting:
+  include_raw_output: false  # Exclude raw output to save space
+  
+  # Enable notifications in production
+notifications:
+  enabled: true
+  
+  email:
+    enabled: false  # Configure if needed
+  
+  webhook:
+    enabled: false  # Configure if needed
+
+# Production performance settings
+performance:
+  max_memory_mb: 4096   # 4GB
+  max_disk_usage_mb: 51200  # 50GB
+  cleanup_interval: 3600    # 1 hour

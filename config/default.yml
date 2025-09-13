@@ -1,0 +1,154 @@
+# VulnMiner Default Configuration
+# This is the base configuration file that defines default settings
+# for all environments. Environment-specific configs will override these values.
+
+system:
+  version: "1.0.0"
+  environment: "development"
+  debug: true
+  max_concurrent_scans: 10
+  timeout: 300  # seconds
+  logs_dir: "logs"
+  data_dir: "data"
+
+security:
+  authorization:
+    enabled: true
+    whitelist_only: true
+    # Add authorized targets here (IPs, domains, CIDR ranges)
+    allowed_targets:
+      - "localhost"
+      - "127.0.0.1"
+      - "::1"
+      # Example: Add your authorized targets
+      # - "192.168.1.0/24"
+      # - "example.com"
+      # - "*.internal.domain.com"
+  
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+    burst_limit: 10
+  
+  ssl_verification: true
+  
+  # Target safety settings
+  target_safety:
+    allow_localhost: true
+    allow_private_networks: true
+  
+  # Scan type restrictions
+  scan_restrictions:
+    # List of allowed scan types (empty means all allowed)
+    allowed_scan_types: []
+    
+    # List of forbidden scan types
+    forbidden_scan_types: []
+    
+    # Aggressive scans require explicit authorization
+    aggressive_scan_types:
+      - "comprehensive"
+      - "intrusive"
+  
+  # Targets explicitly authorized for aggressive scans
+  aggressive_scan_targets: []
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_rotation: true
+  max_file_size: "10MB"
+  backup_count: 5
+
+database:
+  type: "sqlite"  # sqlite, postgresql, mysql
+  path: "data/vulns.db"
+  pool_size: 10
+  timeout: 30
+
+tools:
+  nmap:
+    path: "nmap"  # Will search in PATH if not absolute
+    default_args:
+      - "-sS"  # SYN scan
+      - "-O"   # OS detection
+      - "-sV"  # Version detection
+    timeout: 300
+  
+  nuclei:
+    path: "nuclei"  # Will search in PATH if not absolute
+    templates_dir: "data/nuclei-templates"
+    default_args:
+      - "-c"
+      - "50"   # Concurrent requests
+    timeout: 600
+  
+  # Directory for custom scripts
+  custom_scripts_dir: "scripts/"
+
+# Scanning configuration
+scanning:
+  # Default scan profiles
+  profiles:
+    quick:
+      description: "Quick scan with basic checks"
+      timeout: 300
+      tools: ["nmap"]
+    
+    standard:
+      description: "Standard comprehensive scan"
+      timeout: 1800
+      tools: ["nmap", "nuclei"]
+    
+    thorough:
+      description: "Thorough scan with all tools"
+      timeout: 3600
+      tools: ["nmap", "nuclei"]
+  
+  # Default profile to use
+  default_profile: "standard"
+  
+  # Results retention
+  results:
+    retention_days: 30
+    auto_cleanup: true
+
+# Reporting configuration
+reporting:
+  formats:
+    - "json"
+    - "html"
+  
+  output_dir: "reports/"
+  include_raw_output: false
+  
+  # Report templates
+  templates:
+    html_template: "templates/report.html"
+    json_schema: "templates/report_schema.json"
+
+# Notification settings (for future use)
+notifications:
+  enabled: false
+  
+  # Email notifications
+  email:
+    enabled: false
+    smtp_server: ""
+    smtp_port: 587
+    username: ""
+    password: ""
+    from_address: ""
+    to_addresses: []
+  
+  # Webhook notifications
+  webhook:
+    enabled: false
+    url: ""
+    headers: {}
+
+# Performance tuning
+performance:
+  max_memory_mb: 1024
+  max_disk_usage_mb: 5120  # 5GB
+  cleanup_interval: 3600   # 1 hour

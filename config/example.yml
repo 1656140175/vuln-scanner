@@ -1,0 +1,206 @@
+# VulnMiner Example Configuration
+# This is an example configuration showing all available options
+# Copy this file and customize for your specific needs
+
+# IMPORTANT: This tool is for authorized security testing only
+# Ensure you have proper authorization before adding any targets
+
+system:
+  version: "1.0.0"
+  environment: "development"  # development, testing, production
+  debug: true
+  max_concurrent_scans: 10
+  timeout: 300  # Global timeout in seconds
+  logs_dir: "logs"
+  data_dir: "data"
+
+security:
+  authorization:
+    enabled: true
+    whitelist_only: true  # Only scan whitelisted targets
+    # Add your authorized targets here
+    allowed_targets:
+      # IP addresses
+      - "192.168.1.100"
+      
+      # CIDR ranges
+      - "10.0.0.0/24"
+      
+      # Domain names
+      - "example.com"
+      
+      # Wildcard domains
+      - "*.internal.company.com"
+      
+      # Public test sites (safe for testing)
+      - "testphp.vulnweb.com"
+      - "demo.testfire.net"
+  
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+    burst_limit: 10
+  
+  ssl_verification: true
+  
+  target_safety:
+    allow_localhost: true
+    allow_private_networks: true
+  
+  scan_restrictions:
+    # Allowed scan types (empty means all allowed)
+    allowed_scan_types: []
+    
+    # Forbidden scan types
+    forbidden_scan_types:
+      - "dos"      # Denial of service
+      - "exploit"  # Active exploitation
+    
+    # Aggressive scans (require explicit authorization)
+    aggressive_scan_types:
+      - "comprehensive"
+      - "intrusive"
+  
+  # Targets explicitly authorized for aggressive scans
+  aggressive_scan_targets:
+    - "testlab.internal"
+
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_rotation: true
+  max_file_size: "10MB"
+  backup_count: 5
+
+database:
+  type: "sqlite"  # sqlite, postgresql, mysql
+  path: "data/vulns.db"
+  
+  # For PostgreSQL/MySQL (uncomment and configure)
+  # host: "localhost"
+  # port: 5432
+  # database: "vulnminer"
+  # username: "vulnminer"
+  # password: "secure_password"
+  
+  pool_size: 10
+  timeout: 30
+
+tools:
+  nmap:
+    path: "nmap"  # Use absolute path for production
+    default_args:
+      - "-sS"      # SYN scan
+      - "-O"       # OS detection
+      - "-sV"      # Version detection
+      - "--script"
+      - "default"  # Default scripts
+    timeout: 300
+  
+  nuclei:
+    path: "nuclei"
+    templates_dir: "data/nuclei-templates"
+    default_args:
+      - "-c"
+      - "50"       # Concurrent requests
+      - "-rl"
+      - "100"      # Rate limit
+    timeout: 600
+  
+  # Add more tools as needed
+  # masscan:
+  #   path: "masscan"
+  #   default_args: ["-p", "1-65535", "--rate", "1000"]
+  
+  custom_scripts_dir: "scripts/"
+
+scanning:
+  profiles:
+    quick:
+      description: "Quick scan with basic checks"
+      timeout: 300
+      tools: ["nmap"]
+      nmap_args: ["-sS", "-F"]  # Fast scan
+    
+    standard:
+      description: "Standard comprehensive scan"
+      timeout: 1800
+      tools: ["nmap", "nuclei"]
+    
+    thorough:
+      description: "Thorough scan with all tools"
+      timeout: 3600
+      tools: ["nmap", "nuclei"]
+      nmap_args: ["-sS", "-O", "-sV", "-sC", "-A"]
+    
+    # Custom profile example
+    web_app:
+      description: "Web application focused scan"
+      timeout: 2400
+      tools: ["nuclei"]
+      nuclei_args: ["-t", "http/", "-t", "ssl/"]
+  
+  default_profile: "standard"
+  
+  results:
+    retention_days: 30
+    auto_cleanup: true
+
+reporting:
+  formats:
+    - "json"
+    - "html"
+    - "csv"
+  
+  output_dir: "reports/"
+  include_raw_output: false
+  
+  templates:
+    html_template: "templates/report.html"
+    json_schema: "templates/report_schema.json"
+
+# Notifications (configure as needed)
+notifications:
+  enabled: false
+  
+  email:
+    enabled: false
+    smtp_server: "smtp.example.com"
+    smtp_port: 587
+    use_tls: true
+    username: "notifications@example.com"
+    password: "smtp_password"
+    from_address: "vulnminer@example.com"
+    to_addresses:
+      - "security@example.com"
+  
+  webhook:
+    enabled: false
+    url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+    headers:
+      Content-Type: "application/json"
+
+# Performance tuning
+performance:
+  max_memory_mb: 1024
+  max_disk_usage_mb: 5120
+  cleanup_interval: 3600
+
+# Advanced settings
+advanced:
+  # Enable/disable specific features
+  features:
+    vulnerability_scoring: true
+    threat_intelligence: false
+    custom_plugins: true
+  
+  # Plugin directories
+  plugin_dirs:
+    - "plugins/"
+    - "/usr/local/share/vulnminer/plugins/"
+  
+  # Cache settings
+  cache:
+    enabled: true
+    ttl_seconds: 3600
+    max_entries: 10000

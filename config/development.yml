@@ -1,0 +1,62 @@
+# VulnMiner Development Environment Configuration
+# This file contains development-specific settings that override default.yml
+
+system:
+  environment: "development"
+  debug: true
+  max_concurrent_scans: 5
+
+security:
+  authorization:
+    # More permissive settings for development
+    whitelist_only: false
+  
+  rate_limiting:
+    # Relaxed rate limiting for development
+    requests_per_minute: 120
+    burst_limit: 20
+
+logging:
+  level: "DEBUG"
+  # Use human-readable format for development console output
+  format: "%(asctime)s [%(levelname)8s] %(name)20s: %(message)s"
+
+# Development database settings
+database:
+  path: "data/dev_vulns.db"
+
+# Development tool paths (adjust as needed for your system)
+tools:
+  nmap:
+    path: "nmap"
+    # More verbose output for development
+    default_args:
+      - "-v"   # Verbose
+      - "-sS"  # SYN scan
+      - "-sV"  # Version detection
+  
+  nuclei:
+    path: "nuclei"
+    default_args:
+      - "-v"   # Verbose
+      - "-c"
+      - "10"   # Lower concurrency for development
+
+# Development scanning settings
+scanning:
+  default_profile: "quick"
+  
+  # Faster cleanup for development
+  results:
+    retention_days: 7
+    auto_cleanup: true
+
+# Development reporting
+reporting:
+  include_raw_output: true  # Include raw tool output for debugging
+  
+# Development performance settings
+performance:
+  max_memory_mb: 512
+  max_disk_usage_mb: 1024  # 1GB
+  cleanup_interval: 1800   # 30 minutes
