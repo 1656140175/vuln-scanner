@@ -8,7 +8,7 @@ from .security_exceptions import (
 )
 from .scan_exceptions import (
     ScanError, ScanTimeoutError, ToolNotFoundError, ToolExecutionError,
-    InvalidTargetError
+    InvalidTargetError, ScanEngineException, UnauthorizedTargetException
 )
 from .system_exceptions import (
     SystemError, ResourceNotFoundError, ResourceExhaustionError,
@@ -21,7 +21,7 @@ __all__ = [
     'SecurityError', 'UnauthorizedTargetError', 'RateLimitExceededError',
     'AuthorizationError',
     'ScanError', 'ScanTimeoutError', 'ToolNotFoundError', 'ToolExecutionError',
-    'InvalidTargetError',
+    'InvalidTargetError', 'ScanEngineException', 'UnauthorizedTargetException',
     'SystemError', 'ResourceNotFoundError', 'ResourceExhaustionError',
     'DatabaseError', 'DependencyError'
 ]

@@ -233,3 +233,129 @@ class ScanResultParseError(ScanError):
         
         self.parse_error = parse_error
         self.raw_output = raw_output
+
+
+class ScanEngineException(ScanError):
+    """Base exception for scan engine specific errors."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize scan engine exception.
+        
+        Args:
+            message: Error message
+            **kwargs: Additional arguments for base class
+        """
+        kwargs['error_code'] = kwargs.get('error_code', 'SCAN_ENGINE_ERROR')
+        super().__init__(message, **kwargs)
+
+
+class UnauthorizedTargetException(ScanEngineException):
+    """Exception raised when target is not authorized for scanning."""
+    
+    def __init__(self, target: str, validation_info: Optional[Dict[str, Any]] = None, **kwargs):
+        """Initialize unauthorized target exception.
+        
+        Args:
+            target: Unauthorized target
+            validation_info: Security validation information
+            **kwargs: Additional arguments for base class
+        """
+        message = f"Target '{target}' is not authorized for scanning"
+        
+        details = kwargs.get('details', {})
+        details['target'] = target
+        if validation_info:
+            details['validation_info'] = validation_info
+        
+        kwargs['details'] = details
+        kwargs['error_code'] = 'UNAUTHORIZED_TARGET'
+        kwargs['suggestion'] = 'Add target to authorized whitelist or check security policies'
+        
+        super().__init__(message, **kwargs)
+        
+        self.validation_info = validation_info
+
+
+class PipelineConfigurationError(ScanEngineException):
+    """Exception raised when scan pipeline configuration is invalid."""
+    
+    def __init__(self, pipeline_name: str, error_details: str, **kwargs):
+        """Initialize pipeline configuration error.
+        
+        Args:
+            pipeline_name: Name of the invalid pipeline
+            error_details: Details about the configuration error
+            **kwargs: Additional arguments for base class
+        """
+        message = f"Pipeline '{pipeline_name}' configuration error: {error_details}"
+        
+        details = kwargs.get('details', {})
+        details.update({
+            'pipeline_name': pipeline_name,
+            'error_details': error_details
+        })
+        
+        kwargs['details'] = details
+        kwargs['error_code'] = 'PIPELINE_CONFIG_ERROR'
+        kwargs['suggestion'] = f'Fix configuration for pipeline {pipeline_name}'
+        
+        super().__init__(message, **kwargs)
+        
+        self.pipeline_name = pipeline_name
+        self.error_details = error_details
+
+
+class ScanJobError(ScanEngineException):
+    """Exception raised for scan job related errors."""
+    
+    def __init__(self, job_id: str, error_details: str, **kwargs):
+        """Initialize scan job error.
+        
+        Args:
+            job_id: ID of the scan job
+            error_details: Details about the job error
+            **kwargs: Additional arguments for base class
+        """
+        message = f"Scan job '{job_id}' error: {error_details}"
+        
+        details = kwargs.get('details', {})
+        details.update({
+            'job_id': job_id,
+            'error_details': error_details
+        })
+        
+        kwargs['details'] = details
+        kwargs['error_code'] = 'SCAN_JOB_ERROR'
+        
+        super().__init__(message, **kwargs)
+        
+        self.job_id = job_id
+        self.error_details = error_details
+
+
+class ResultAggregationError(ScanEngineException):
+    """Exception raised when result aggregation fails."""
+    
+    def __init__(self, aggregation_stage: str, error_details: str, **kwargs):
+        """Initialize result aggregation error.
+        
+        Args:
+            aggregation_stage: Stage where aggregation failed
+            error_details: Details about the aggregation error
+            **kwargs: Additional arguments for base class
+        """
+        message = f"Result aggregation failed at stage '{aggregation_stage}': {error_details}"
+        
+        details = kwargs.get('details', {})
+        details.update({
+            'aggregation_stage': aggregation_stage,
+            'error_details': error_details
+        })
+        
+        kwargs['details'] = details
+        kwargs['error_code'] = 'RESULT_AGGREGATION_ERROR'
+        
+        super().__init__(message, **kwargs)
+        
+        self.aggregation_stage = aggregation_stage
+        self.error_details = error_details

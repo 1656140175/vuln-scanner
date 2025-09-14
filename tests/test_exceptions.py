@@ -3,8 +3,8 @@
 import pytest
 
 from vuln_scanner.core.exceptions import (
-    VulnMinerException, VulnMinerError, VulnMinerCriticalError,
-    ConfigurationError, ConfigValidationError, ConfigFileNotFoundError,
+    VulnMinerException, VulnMinerError,
+    ConfigurationError, ConfigValidationError,
     SecurityError, UnauthorizedTargetError, RateLimitExceededError,
     ScanError, ScanTimeoutError, ToolNotFoundError, ToolExecutionError,
     SystemError, ResourceNotFoundError, DatabaseError

@@ -1,188 +1,240 @@
-# VulnMiner Default Configuration
+# Default VulnMiner Configuration
 # This is the base configuration file that defines default settings
-# for all environments. Environment-specific configs will override these values.
 
+# System Configuration
 system:
-  version: "1.0.0"
-  environment: "development"
-  debug: true
-  max_concurrent_scans: 10
-  timeout: 300  # seconds
-  logs_dir: "logs"
-  data_dir: "data"
-
-security:
-  authorization:
-    enabled: true
-    whitelist_only: true
-    # Add authorized targets here (IPs, domains, CIDR ranges)
-    allowed_targets:
-      - "localhost"
-      - "127.0.0.1"
-      - "::1"
-      # Example: Add your authorized targets
-      # - "192.168.1.0/24"
-      # - "example.com"
-      # - "*.internal.domain.com"
+  debug: false
+  max_concurrent_scans: 5
+  timeout: 300
+  max_scan_runtime: 3600  # 1 hour maximum per scan
   
-  rate_limiting:
-    enabled: true
-    requests_per_minute: 60
-    burst_limit: 10
+# Database Configuration
+database:
+  path: "data/scans.db"
+  retention_days: 90
   
-  ssl_verification: true
-  
-  # Target safety settings
-  target_safety:
-    allow_localhost: true
-    allow_private_networks: true
-  
-  # Scan type restrictions
-  scan_restrictions:
-    # List of allowed scan types (empty means all allowed)
-    allowed_scan_types: []
-    
-    # List of forbidden scan types
-    forbidden_scan_types: []
-    
-    # Aggressive scans require explicit authorization
-    aggressive_scan_types:
-      - "comprehensive"
-      - "intrusive"
-  
-  # Targets explicitly authorized for aggressive scans
-  aggressive_scan_targets: []
-
+# Logging Configuration
 logging:
   level: "INFO"
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-  file_rotation: true
-  max_file_size: "10MB"
-  backup_count: 5
+  file: "logs/vulnminer.log"
+  structured: true
+  
+# Security Configuration
+security:
+  ssl_verification: true
+  authorization:
+    enabled: true
+    whitelist_only: true
+    authorized_targets: []
+  rate_limiting:
+    enabled: true
+    max_requests_per_minute: 60
+    max_requests_per_hour: 1000
+  scan_restrictions:
+    allowed_scan_types: []  # Empty means all types allowed
+    forbidden_scan_types: []
+    aggressive_scan_types: ["exploitation"]
+  target_safety:
+    allow_localhost: false
+    allow_private_networks: true
+  aggressive_scan_targets: []  # Targets explicitly authorized for aggressive scans
 
-database:
-  type: "sqlite"  # sqlite, postgresql, mysql
-  path: "data/vulns.db"
-  pool_size: 10
-  timeout: 30
-
+# Tool Configuration
 tools:
-  # Tool management settings
   db_path: "data/tools.db"
-  registry_file: "data/tool_registry.json"
   usage_retention_days: 30
-  auto_install: false  # Whether to auto-install tools on first use
   
-  # Tool configurations
+  # Nmap Configuration
   nmap:
-    path: "nmap"  # Will search in PATH if not absolute
-    default_args:
-      - "-sS"  # SYN scan
-      - "-O"   # OS detection
-      - "-sV"  # Version detection
-    timeout: 300
-  
+    enabled: true
+    path: null  # Auto-detect
+    version: "latest"
+    config:
+      default_args: ["-sS", "-O", "-sV"]
+      timing_template: 3
+      max_targets: 100
+      
+  # Nuclei Configuration
   nuclei:
-    path: "nuclei"  # Will search in PATH if not absolute
-    templates_dir: "data/nuclei-templates"
-    default_args:
-      - "-c"
-      - "50"   # Concurrent requests
-    timeout: 600
-    rate_limit: 150
-    concurrency: 25
-  
-  # Additional tools can be configured here
-  subfinder:
-    path: "subfinder"
-    timeout: 300
-    default_args:
-      - "-silent"
-  
+    enabled: true
+    path: null  # Auto-detect
+    version: "latest"
+    config:
+      templates_path: "nuclei-templates"
+      severity_levels: ["info", "low", "medium", "high", "critical"]
+      max_templates: 1000
+      
+  # HTTPx Configuration
   httpx:
-    path: "httpx" 
-    timeout: 300
-    default_args:
-      - "-silent"
-  
+    enabled: true
+    path: null
+    version: "latest"
+    config:
+      timeout: 10
+      threads: 50
+      
+  # Subfinder Configuration
+  subfinder:
+    enabled: true
+    path: null
+    version: "latest"
+    config:
+      timeout: 30
+      
+  # Gobuster Configuration
   gobuster:
-    path: "gobuster"
-    timeout: 600
-    default_args:
-      - "-q"
-  
-  sqlmap:
-    path: "sqlmap"
-    timeout: 1800
-    default_args:
-      - "--batch"
-  
-  # Directory for custom scripts
-  custom_scripts_dir: "scripts/"
+    enabled: true
+    path: null
+    version: "latest"
+    config:
+      wordlists_path: "wordlists"
+      default_wordlist: "common.txt"
+      threads: 10
 
-# Scanning configuration
-scanning:
-  # Default scan profiles
-  profiles:
-    quick:
-      description: "Quick scan with basic checks"
-      timeout: 300
-      tools: ["nmap"]
+# Scan Pipeline Configuration
+pipelines:
+  # Quick scan pipeline for fast reconnaissance
+  quick:
+    discovery:
+      tools:
+        - name: nmap
+          args:
+            scan_type: fast
+            ports: "22,80,443,8080,8443"
+            timeout: 60
+          timeout: 60
+      parallel: false
+      timeout: 120
+      continue_on_error: true
+      
+    vulnerability_scan:
+      tools:
+        - name: nuclei
+          args:
+            severity: "medium,high,critical"
+            tags: "cve,owasp,rce,sqli,xss"
+            timeout: 300
+          timeout: 300
+      parallel: false
+      timeout: 400
+      continue_on_error: true
+  
+  # Comprehensive scan pipeline for thorough analysis
+  comprehensive:
+    discovery:
+      tools:
+        - name: nmap
+          args:
+            scan_type: comprehensive
+            ports: "1-65535"
+            service_version: true
+            os_detection: true
+            timeout: 600
+          timeout: 600
+      parallel: false
+      timeout: 800
+      continue_on_error: true
+      
+    enumeration:
+      tools:
+        - name: subfinder
+          args:
+            passive: true
+            timeout: 180
+          timeout: 180
+        - name: httpx
+          args:
+            probe: true
+            status_code: true
+            content_length: true
+            timeout: 10
+          timeout: 120
+      parallel: true
+      timeout: 400
+      continue_on_error: true
+      
+    vulnerability_scan:
+      tools:
+        - name: nuclei
+          args:
+            severity: "low,medium,high,critical"
+            timeout: 900
+            rate_limit: 150
+          timeout: 900
+      parallel: false
+      timeout: 1000
+      continue_on_error: true
+  
+  # Web application focused scan pipeline
+  webapp:
+    discovery:
+      tools:
+        - name: httpx
+          args:
+            probe: true
+            status_code: true
+            tech_detect: true
+            timeout: 10
+          timeout: 60
+      parallel: false
+      timeout: 120
+      continue_on_error: true
+      
+    enumeration:
+      tools:
+        - name: gobuster
+          args:
+            mode: dir
+            wordlist: web-common
+            extensions: "php,html,js,txt,xml,json"
+            status_codes: "200,204,301,302,307,401,403"
+            timeout: 300
+          timeout: 300
+        - name: subfinder
+          args:
+            passive: true
+            timeout: 120
+          timeout: 120
+      parallel: true
+      timeout: 400
+      continue_on_error: true
+      
+    vulnerability_scan:
+      tools:
+        - name: nuclei
+          args:
+            tags: "web,owasp,cve"
+            severity: "medium,high,critical"
+            timeout: 600
+            rate_limit: 100
+          timeout: 600
+      parallel: false
+      timeout: 800
+      continue_on_error: true
+
+# Result Aggregation Configuration
+aggregation:
+  duplicate_threshold: 0.8  # Similarity threshold for duplicate detection
+  correlation_window: 300   # Time window in seconds for correlating findings
+  confidence_threshold: 0.7 # Minimum confidence for high-value findings
+  
+# Constraints and Limits
+constraints:
+  rate_limiting:
+    enabled: true
+    max_requests_per_second: 10
+    burst_allowance: 50
     
-    standard:
-      description: "Standard comprehensive scan"
-      timeout: 1800
-      tools: ["nmap", "nuclei"]
+  timeout:
+    default: 300
+    maximum: 3600
     
-    thorough:
-      description: "Thorough scan with all tools"
-      timeout: 3600
-      tools: ["nmap", "nuclei"]
-  
-  # Default profile to use
-  default_profile: "standard"
-  
-  # Results retention
-  results:
-    retention_days: 30
-    auto_cleanup: true
-
-# Reporting configuration
-reporting:
-  formats:
-    - "json"
-    - "html"
-  
-  output_dir: "reports/"
-  include_raw_output: false
-  
-  # Report templates
-  templates:
-    html_template: "templates/report.html"
-    json_schema: "templates/report_schema.json"
-
-# Notification settings (for future use)
-notifications:
-  enabled: false
-  
-  # Email notifications
-  email:
-    enabled: false
-    smtp_server: ""
-    smtp_port: 587
-    username: ""
-    password: ""
-    from_address: ""
-    to_addresses: []
-  
-  # Webhook notifications
-  webhook:
-    enabled: false
-    url: ""
-    headers: {}
-
-# Performance tuning
-performance:
-  max_memory_mb: 1024
-  max_disk_usage_mb: 5120  # 5GB
-  cleanup_interval: 3600   # 1 hour
+  concurrent_scans:
+    maximum: 5
+    per_target: 1
+    
+  resource_limits:
+    max_memory_mb: 2048
+    max_cpu_percent: 80
+    max_disk_usage_mb: 5000

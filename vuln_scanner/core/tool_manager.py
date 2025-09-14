@@ -4,10 +4,10 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional
 
-from .manager import ToolManager
-from .registry import ToolRegistry
-from .implementations import NmapTool, NucleiTool
-from ..core.exceptions import VulnMinerException
+from ..tools.manager import ToolManager
+from ..tools.registry import ToolRegistry
+from ..tools.implementations import NmapTool, NucleiTool
+from .exceptions import VulnMinerException
 
 
 class ToolManagerComponent:
