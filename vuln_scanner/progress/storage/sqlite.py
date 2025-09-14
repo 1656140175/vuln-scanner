@@ -10,13 +10,13 @@ from typing import Dict, List, Any, Optional
 
 from .base import ProgressStorage
 from ..models import ProgressState, CheckpointInfo
-from ...core.exceptions import BaseException
+from ...core.exceptions import VulnMinerException
 
 
 logger = logging.getLogger(__name__)
 
 
-class SqliteStorageException(BaseException):
+class class SqliteStorageException(BaseException):(VulnMinerException):
     """SQLite storage specific exceptions."""
     pass
 

@@ -22,7 +22,7 @@ from ..core.exceptions import BaseException
 logger = logging.getLogger(__name__)
 
 
-class MonitoringException(BaseException):
+class class MonitoringException(BaseException):(VulnMinerException):
     """Monitoring system specific exceptions."""
     pass
 

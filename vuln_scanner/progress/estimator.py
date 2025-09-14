@@ -17,7 +17,7 @@ from ..core.exceptions import BaseException
 logger = logging.getLogger(__name__)
 
 
-class EstimationException(BaseException):
+class class EstimationException(BaseException):(VulnMinerException):
     """Progress estimation specific exceptions."""
     pass
 

@@ -17,7 +17,7 @@ from ..core.exceptions import BaseException
 logger = logging.getLogger(__name__)
 
 
-class QueueException(BaseException):
+class class QueueException(BaseException):(VulnMinerException):
     """Task queue specific exceptions."""
     pass
 

@@ -21,7 +21,7 @@ from ..core.exceptions import BaseException
 logger = logging.getLogger(__name__)
 
 
-class ProgressManagerException(BaseException):
+class class ProgressManagerException(BaseException):(VulnMinerException):
     """Progress manager specific exceptions."""
     pass
 

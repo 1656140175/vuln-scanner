@@ -16,7 +16,7 @@ from ..core.exceptions import BaseException
 logger = logging.getLogger(__name__)
 
 
-class WebSocketException(BaseException):
+class class WebSocketException(BaseException):(VulnMinerException):
     """WebSocket specific exceptions."""
     pass
 
