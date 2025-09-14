@@ -9,13 +9,12 @@ from enum import Enum
 
 
 class ScanPhase(Enum):
-    """Scanning phases enumeration."""
-    DISCOVERY = "discovery"           # Discovery phase
-    RECONNAISSANCE = "reconnaissance" # Reconnaissance phase  
-    ENUMERATION = "enumeration"       # Enumeration phase
-    VULNERABILITY_SCAN = "vulnerability_scan"  # Vulnerability scanning
-    EXPLOITATION = "exploitation"     # Exploitation verification (PoC only)
-    POST_ANALYSIS = "post_analysis"   # Post-analysis phase
+    """Five-phase scanning system enumeration."""
+    RECONNAISSANCE = "reconnaissance"  # Phase 1: Deep reconnaissance - subdomain discovery, tech stack identification
+    DISCOVERY = "discovery"           # Phase 2: Comprehensive discovery - port scanning, service identification
+    SCANNING = "scanning"             # Phase 3: Targeted vulnerability scanning - nuclei, specialized tools
+    VERIFICATION = "verification"     # Phase 4: Precise verification - vulnerability validation, PoC generation
+    REPORTING = "reporting"          # Phase 5: Professional report generation - detailed reports, executive summaries
 
 
 class ScanStatus(Enum):
@@ -26,6 +25,15 @@ class ScanStatus(Enum):
     FAILED = "failed"
     CANCELLED = "cancelled"
     PAUSED = "paused"
+
+
+class PhaseStatus(Enum):
+    """Phase execution status enumeration."""
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SKIPPED = "skipped"
 
 
 class ScanSeverity(Enum):
@@ -196,3 +204,59 @@ class ScanJob:
         """
         return [result for result in self.results 
                 if result.severity in [ScanSeverity.HIGH, ScanSeverity.CRITICAL]]
+
+
+@dataclass 
+class PhaseResult:
+    """Result of a phase execution."""
+    phase: ScanPhase
+    status: PhaseStatus
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    data: Dict[str, Any] = field(default_factory=dict)
+    errors: List[str] = field(default_factory=list)
+    next_phase_inputs: Dict[str, Any] = field(default_factory=dict)
+    results: List[ScanResult] = field(default_factory=list)
+    metrics: Dict[str, Any] = field(default_factory=dict)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert phase result to dictionary format.
+        
+        Returns:
+            Dictionary representation of the phase result
+        """
+        return {
+            'phase': self.phase.value,
+            'status': self.status.value,
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat() if self.end_time else None,
+            'data': self.data,
+            'errors': self.errors,
+            'next_phase_inputs': self.next_phase_inputs,
+            'results_count': len(self.results),
+            'metrics': self.metrics
+        }
+    
+    def add_error(self, error: str) -> None:
+        """Add error message to the phase result.
+        
+        Args:
+            error: Error message to add
+        """
+        self.errors.append(error)
+    
+    def add_result(self, result: ScanResult) -> None:
+        """Add scan result to this phase.
+        
+        Args:
+            result: ScanResult to add
+        """
+        self.results.append(result)
+    
+    def is_successful(self) -> bool:
+        """Check if phase completed successfully.
+        
+        Returns:
+            True if phase completed without errors
+        """
+        return self.status == PhaseStatus.COMPLETED and not self.errors
