@@ -276,6 +276,28 @@ class ToolRegistry:
                 version_regex=r"GNU Wget (\d+\.\d+)",
                 install_methods=["package_manager"],
                 tags=["download", "utility"]
+            ),
+            ToolDefinition(
+                name="ffuf",
+                display_name="ffuf",
+                category=ToolCategory.WEB_SCANNER,
+                description="Fast web fuzzer written in Go for content discovery and parameter fuzzing",
+                homepage="https://github.com/ffuf/ffuf",
+                repository="https://github.com/ffuf/ffuf",
+                install_url="github.com/ffuf/ffuf/v2@latest",
+                binary_name="ffuf",
+                dependencies=["go"],
+                supported_platforms=["linux", "darwin", "windows"],
+                default_config={
+                    "timeout": 300,
+                    "default_args": ["-c", "-v"],
+                    "threads": 40,
+                    "rate_limit": 0
+                },
+                version_command=["ffuf", "-V"],
+                version_regex=r"ffuf version (\d+\.\d+\.\d+)",
+                install_methods=["go_install", "binary", "package_manager"],
+                tags=["fuzzer", "web", "directory", "parameter"]
             )
         ]
         

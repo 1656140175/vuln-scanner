@@ -17,7 +17,7 @@ from .formatters import FormatterRegistry
 from .templates import TemplateManager
 from .risk import RiskCalculator
 from .compliance import ComplianceMapper
-from .intelligence import IntelligentSummarizer, RecommendationEngine
+from .intelligence import IntelligentSummarizer
 
 from ..scanning.data_structures import ScanJob, ScanResult, ScanPhase
 from ..exceptions import ScanEngineException

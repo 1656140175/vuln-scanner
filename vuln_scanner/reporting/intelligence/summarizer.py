@@ -245,7 +245,7 @@ class IntelligentSummarizer:
         Timeline: 2-4 weeks for comprehensive security improvements
         """
     
-    def _parse_llm_summary(self, llm_response: str, findings: List[TechnicalFinding], 
+    async def _parse_llm_summary(self, llm_response: str, findings: List[TechnicalFinding], 
                           target_info: TargetInfo) -> ExecutiveSummary:
         """Parse LLM response into ExecutiveSummary object."""
         # For now, use template summarizer to create structured object

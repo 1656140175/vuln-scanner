@@ -238,3 +238,91 @@ constraints:
     max_memory_mb: 2048
     max_cpu_percent: 80
     max_disk_usage_mb: 5000
+
+# Platform Integration Configuration
+platforms:
+  enabled: false  # Set to true to enable platform integrations
+  
+  # HackerOne Configuration
+  hackerone:
+    enabled: false
+    credentials:
+      username: "${HACKERONE_USERNAME}"
+      api_token: "${HACKERONE_API_TOKEN}"
+    config:
+      base_url: "https://api.hackerone.com/v1"
+      rate_limit_per_hour: 60
+      rate_limit_per_minute: 10
+      retry_config:
+        max_retries: 3
+        backoff_factor: 2
+        timeout_seconds: 30
+      severity_mapping:
+        critical: "critical"
+        high: "high"
+        medium: "medium"
+        low: "low"
+        info: "none"
+  
+  # Bugcrowd Configuration
+  bugcrowd:
+    enabled: false
+    credentials:
+      email: "${BUGCROWD_EMAIL}"
+      password: "${BUGCROWD_PASSWORD}"
+    config:
+      base_url: "https://api.bugcrowd.com"
+      rate_limit_per_hour: 100
+      rate_limit_per_minute: 15
+      retry_config:
+        max_retries: 3
+        backoff_factor: 2
+        timeout_seconds: 30
+      severity_mapping:
+        critical: "P1"
+        high: "P2"
+        medium: "P3"
+        low: "P4"
+        info: "P5"
+  
+  # Intigriti Configuration
+  intigriti:
+    enabled: false
+    credentials:
+      api_key: "${INTIGRITI_API_KEY}"
+      secret_key: "${INTIGRITI_SECRET_KEY}"
+    config:
+      base_url: "https://api.intigriti.com/core/researcher"
+      rate_limit_per_hour: 120
+      rate_limit_per_minute: 20
+      retry_config:
+        max_retries: 3
+        backoff_factor: 2
+        timeout_seconds: 30
+      severity_mapping:
+        critical: "Critical"
+        high: "High"
+        medium: "Medium"
+        low: "Low"
+        info: "Info"
+  
+  # OpenBugBounty Configuration
+  openbugbounty:
+    enabled: false
+    credentials:
+      username: "${OBB_USERNAME}"
+      password: "${OBB_PASSWORD}"
+    config:
+      base_url: "https://www.openbugbounty.org"
+      rate_limit_per_hour: 50
+      rate_limit_per_minute: 5
+      retry_config:
+        max_retries: 2
+        backoff_factor: 3
+        timeout_seconds: 45
+      severity_mapping:
+        critical: "High"
+        high: "High"
+        medium: "Medium"
+        low: "Low"
+        info: "Info"
